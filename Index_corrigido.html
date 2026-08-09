@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Para Minha Princesa♾️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#130a22;
+    --bg-mid:#2a1245;
+    --bg-mid2:#3a1650;
+    --pink:#ff7ab8;
+    --pink-soft:#ffb3d6;
+    --lilac:#b98af0;
+    --gold:#ffd9a0;
+    --text:#fdf2ff;
+    --text-dim:#cdb8e6;
+    --glass:rgba(255,255,255,0.06);
+    --glass-border:rgba(255,255,255,0.14);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; height:100%; overflow:hidden;}
+  body{
+    font-family:'Poppins', sans-serif;
+    background: radial-gradient(circle at 20% 10%, var(--bg-mid2), var(--bg-deep) 60%);
+    color:var(--text);
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+  h1,h2,h3, .display{ font-family:'Playfair Display', serif; }
+
+  #bg-canvas{
+    position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;
+  }
+
+  /* ---------- top progress ---------- */
+  #progress-wrap{
+    position:fixed; top:0; left:0; width:100%; padding:14px 18px 10px;
+    z-index:50; display:flex; align-items:center; gap:12px;
+    background:linear-gradient(to bottom, rgba(19,10,34,0.85), rgba(19,10,34,0));
+    opacity:0; pointer-events:none; transition:opacity .5s ease;
+  }
+  #progress-wrap.show{ opacity:1; }
+  .progress-track{
+    flex:1; height:6px; border-radius:6px; background:rgba(255,255,255,0.12); overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; width:0%; border-radius:6px;
+    background:linear-gradient(90deg, var(--pink), var(--lilac));
+    transition:width .7s cubic-bezier(.65,.1,.35,1);
+    box-shadow:0 0 12px rgba(255,122,184,0.7);
+  }
+  .progress-label{
+    font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); white-space:nowrap;
+  }
+
+  /* ---------- screens ---------- */
+  .screen{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; text-align:center; padding:32px 20px;
+    z-index:5; opacity:0; visibility:hidden; transform:translateY(24px) scale(.98);
+    transition:opacity .6s ease, transform .6s ease, visibility 0s linear .6s;
+    overflow-y:auto;
+  }
+  .screen.active{
+    opacity:1; visibility:visible; transform:translateY(0) scale(1);
+    transition:opacity .6s ease, transform .6s ease, visibility 0s linear 0s;
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:.25em; text-transform:uppercase; color:var(--pink-soft);
+    margin-bottom:14px; opacity:.85;
+  }
+  .btn{
+    font-family:'Poppins', sans-serif; font-weight:600; font-size:15px; letter-spacing:.02em;
+    color:var(--bg-deep); background:linear-gradient(120deg, var(--pink-soft), var(--gold));
+    border:none; padding:14px 34px; border-radius:100px; cursor:pointer;
+    box-shadow:0 8px 24px rgba(255,122,184,0.35);
+    transition:transform .25s ease, box-shadow .25s ease;
+    margin-top:22px;
+  }
+  .btn:hover{ transform:translateY(-2px) scale(1.03); box-shadow:0 12px 30px rgba(255,122,184,0.5); }
+  .btn:active{ transform:translateY(0) scale(.98); }
+  .btn.ghost{
+    background:transparent; color:var(--text); border:1px solid var(--glass-border);
+    box-shadow:none;
+  }
+  .btn.ghost:hover{ background:var(--glass); }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none !important; }
+
+  .card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:22px;
+    backdrop-filter:blur(14px); padding:32px 26px; max-width:520px; width:100%;
+  }
+
+  /* ---------- infinity signature mark ---------- */
+  .infinity-mark{ width:74px; height:40px; margin:0 auto 18px; }
+  .infinity-mark path{
+    fill:none; stroke:url(#infGrad); stroke-width:6; stroke-linecap:round;
+    stroke-dasharray:220; stroke-dashoffset:220;
+    animation:drawInf 2.2s ease forwards, pulseInf 2.4s ease-in-out 2.2s infinite;
+  }
+  @keyframes drawInf{ to{ stroke-dashoffset:0; } }
+  @keyframes pulseInf{ 0%,100%{ opacity:.85; } 50%{ opacity:1; filter:drop-shadow(0 0 6px var(--pink)); } }
+
+  /* ---------- Screen 0: welcome ---------- */
+  #screen-0 .name-display{
+    font-size:clamp(42px, 11vw, 84px); font-weight:900; line-height:1.05;
+    background:linear-gradient(120deg, var(--pink-soft), var(--lilac), var(--gold));
+    background-size:200% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:shimmer 4s linear infinite;
+    margin:6px 0 10px;
+  }
+  @keyframes shimmer{ to{ background-position:200% center; } }
+  #screen-0 .sub{ color:var(--text-dim); font-size:15px; max-width:360px; margin:0 auto; }
+  #music-toggle{
+    position:fixed; top:14px; right:16px; z-index:60;
+    width:42px; height:42px; border-radius:50%; border:1px solid var(--glass-border);
+    background:var(--glass); color:var(--text); font-size:17px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px);
+  }
+
+  /* ---------- Screen 1: mensagem ---------- */
+  .msg-line{ font-size:clamp(17px,3.4vw,23px); line-height:1.6; color:var(--text); margin:0 auto 10px; max-width:520px; opacity:0; }
+  .msg-line.reveal{ animation:fadeUp .8s ease forwards; }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- memory game ---------- */
+  .memory-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;
+    max-width:380px; width:100%; margin:18px auto 6px;
+  }
+  .mem-card{
+    aspect-ratio:1/1; border-radius:14px; position:relative; cursor:pointer;
+    perspective:600px;
+  }
+  .mem-inner{
+    position:absolute; inset:0; transform-style:preserve-3d; transition:transform .5s ease;
+    border-radius:14px;
+  }
+  .mem-card.flip .mem-inner{ transform:rotateY(180deg); }
+  .mem-face{
+    position:absolute; inset:0; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    font-size:26px; backface-visibility:hidden;
+  }
+  .mem-front{ background:linear-gradient(135deg, var(--bg-mid2), var(--bg-mid)); border:1px solid var(--glass-border); }
+  .mem-front::after{ content:'♡'; font-size:20px; color:var(--pink-soft); opacity:.6; }
+  .mem-back{ background:linear-gradient(135deg, var(--pink-soft), var(--lilac)); color:#2a1245; transform:rotateY(180deg); }
+  .mem-card.matched .mem-back{ background:linear-gradient(135deg, var(--gold), var(--pink-soft)); }
+  .mem-status{ font-size:13px; color:var(--text-dim); margin-top:8px; }
+
+  /* ---------- quiz ---------- */
+  .quiz-question{ font-size:clamp(19px,4vw,25px); margin-bottom:20px; max-width:480px; }
+  .quiz-options{ display:flex; flex-direction:column; gap:10px; width:100%; max-width:340px; }
+  .opt-btn{
+    font-family:'Poppins'; font-size:15px; font-weight:500; color:var(--text);
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:14px;
+    padding:13px 18px; cursor:pointer; transition:all .25s ease;
+  }
+  .opt-btn:hover{ background:rgba(255,255,255,0.12); transform:translateX(2px); }
+  .opt-btn.chosen{ background:linear-gradient(120deg, var(--pink-soft), var(--lilac)); color:var(--bg-deep); border-color:transparent; }
+  .quiz-feedback{ margin-top:18px; font-size:15px; color:var(--gold); min-height:24px; max-width:400px; }
+  .quiz-counter{ font-size:12px; color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; margin-bottom:6px; }
+
+  /* ---------- click hearts ---------- */
+  #click-arena{
+    position:relative; width:100%; max-width:420px; height:340px; margin:14px auto 0;
+    border-radius:20px; border:1px solid var(--glass-border); background:var(--glass); overflow:hidden;
+  }
+  .float-heart{
+    position:absolute; font-size:26px; cursor:pointer; user-select:none;
+    animation:popin .25s ease; filter:drop-shadow(0 0 6px rgba(255,122,184,.5));
+  }
+  @keyframes popin{ from{ transform:scale(0); } to{ transform:scale(1); } }
+  #click-hud{ display:flex; justify-content:space-between; max-width:420px; width:100%; margin:10px auto 0; font-size:13px; color:var(--text-dim); }
+  #click-hud b{ color:var(--pink-soft); font-size:16px; }
+
+  /* ---------- choice story ---------- */
+  .story-text{ font-size:clamp(17px,3.6vw,22px); max-width:480px; margin-bottom:22px; line-height:1.55; }
+  .story-options{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; max-width:460px; }
+  .story-btn{
+    flex:1 1 160px; font-family:'Poppins'; font-size:14px; font-weight:500; color:var(--text);
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:16px 14px; cursor:pointer;
+    transition:all .25s ease;
+  }
+  .story-btn:hover{ background:linear-gradient(120deg, rgba(255,122,184,.25), rgba(185,138,240,.25)); transform:translateY(-2px); }
+
+  /* ---------- drag / tap sentence ---------- */
+  #sentence-slots{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:50px;
+    max-width:420px; margin:16px auto; padding:10px; border:1.5px dashed var(--glass-border); border-radius:14px;
+  }
+  .slot-tag, .bank-tag{
+    font-size:15px; font-weight:500; padding:9px 16px; border-radius:100px; cursor:pointer;
+    background:linear-gradient(120deg, var(--pink-soft), var(--lilac)); color:var(--bg-deep);
+    transition:transform .2s ease, opacity .2s ease;
+  }
+  .bank-tag{ background:var(--glass); color:var(--text); border:1px solid var(--glass-border); }
+  .bank-tag:hover{ transform:translateY(-2px); }
+  .bank-tag.used{ opacity:0; pointer-events:none; transform:scale(.7); }
+  #word-bank{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:420px; margin-top:6px; }
+  .sentence-hint{ font-size:12px; color:var(--text-dim); margin-top:14px; }
+
+  /* ---------- secret reveal ---------- */
+  #screen-7 .photo-wrap{
+    width:min(78vw, 300px); border-radius:20px; overflow:hidden; margin:6px auto 14px;
+    border:1px solid var(--glass-border); box-shadow:0 20px 50px rgba(0,0,0,.5);
+    opacity:0; transform:scale(.85); transition:opacity 1s ease, transform 1s ease;
+  }
+  #screen-7 .photo-wrap.show{ opacity:1; transform:scale(1); }
+  #screen-7 .photo-wrap img{ width:100%; display:block; }
+  .photo-caption{
+    font-family:'Playfair Display'; font-style:italic; font-size:18px;
+    background:linear-gradient(120deg, var(--pink-soft), var(--lilac));
+    -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:6px;
+  }
+  .final-title{
+    font-size:clamp(30px,7vw,50px); font-weight:900; margin:10px 0 6px;
+    background:linear-gradient(120deg, var(--pink-soft), var(--gold), var(--lilac));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .btn.glow{
+    box-shadow:0 0 20px rgba(255,217,160,.6), 0 0 50px rgba(255,122,184,.4);
+    animation:glowPulse 2s ease-in-out infinite;
+  }
+  @keyframes glowPulse{ 0%,100%{ box-shadow:0 0 20px rgba(255,217,160,.5), 0 0 40px rgba(255,122,184,.3);} 50%{ box-shadow:0 0 30px rgba(255,217,160,.9), 0 0 70px rgba(255,122,184,.6);} }
+
+  .hidden{ display:none !important; }
+  .small-note{ font-size:11px; color:var(--text-dim); opacity:.7; margin-top:16px; max-width:320px; }
+
+  ::-webkit-scrollbar{ width:0; }
+
+  @media (max-width:420px){
+    .memory-grid{ grid-template-columns:repeat(4,1fr); gap:8px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<button id="music-toggle" title="Música">🔇</button>
+<audio id="bg-music" loop preload="none">
+ 
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<div id="progress-wrap">
+  <span class="progress-label" id="progress-label">passo 0/7</span>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- SVG gradient defs -->
+<svg width="0" height="0">
+  <defs>
+    <linearGradient id="infGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff7ab8"/>
+      <stop offset="100%" stop-color="#b98af0"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- ================= SCREEN 0 — WELCOME ================= -->
+<section class="screen active" id="screen-0">
+  <div class="eyebrow">um site feito só pra você</div>
+  <div class="name-display">Amorrrrr</div>
+  <div class="sub">minha princesa ♾️ — Antes de tudo eu te amo muito, agora aperta o botão. 💜</div>
+  <button class="btn" id="btn-start">Começar</button>
+</section>
+
+<!-- ================= SCREEN 1 — MENSAGEM INICIAL ================= -->
+<section class="screen" id="screen-1">
+  <svg class="infinity-mark" viewBox="0 0 100 50"><path d="M25,25 C25,10 45,10 50,25 C55,40 75,40 75,25 C75,10 55,10 50,25 C45,40 25,40 25,25 Z"/></svg>
+  <div id="msg-lines"></div>
+  <button class="btn hidden" id="btn-after-msg">Continuar</button>
+</section>
+
+<!-- ================= SCREEN 2 — JOGO DA MEMÓRIA ================= -->
+<section class="screen" id="screen-2">
+  <div class="eyebrow">fase 1 · memória</div>
+  <h2 class="display">Ache os pares</h2>
+  <p class="msg-line reveal" style="opacity:1">Um joguinho para voce ficar nao ficar entediada</p>
+  <div class="memory-grid" id="memory-grid"></div>
+  <div class="mem-status" id="mem-status">0 movimentos</div>
+  <button class="btn hidden" id="btn-after-memory">Continuar</button>
+</section>
+
+<!-- ================= SCREEN 3 — QUIZ ================= -->
+<section class="screen" id="screen-3">
+  <div class="eyebrow">fase 2 · Perguntinhas para voce </div>
+  <div class="quiz-counter" id="quiz-counter">pergunta 1/4</div>
+  <div class="quiz-question" id="quiz-question"></div>
+  <div class="quiz-options" id="quiz-options"></div>
+  <div class="quiz-feedback" id="quiz-feedback"></div>
+  <button class="btn hidden" id="btn-quiz-next">Próxima</button>
+</section>
+
+<!-- ================= SCREEN 4 — CLIQUE RÁPIDO ================= -->
+<section class="screen" id="screen-4">
+  <div class="eyebrow">fase 3 · reflexo</div>
+  <h2 class="display">Clique nos corações</h2>
+  <p class="msg-line reveal" style="opacity:1">Você tem 20 segundos. Vai! 💗</p>
+  <div id="click-hud"><span>tempo: <b id="click-timer">20</b>s</span><span>pontos: <b id="click-score">0</b></span></div>
+  <div id="click-arena"></div>
+  <button class="btn hidden" id="btn-start-click">Iniciar</button>
+  <button class="btn hidden" id="btn-after-click">Continuar</button>
+</section>
+
+<!-- ================= SCREEN 5 — ESCOLHAS ================= -->
+<section class="screen" id="screen-5">
+  <div class="eyebrow">fase 4 · e se fosse hoje?</div>
+  <div class="story-text" id="story-text">OQ voce achar de uma alinça mo seu dedo kkk</div>
+  <div class="story-options" id="story-options"></div>
+</section>
+
+<!-- ================= SCREEN 6 — MONTAR FRASE ================= -->
+<section class="screen" id="screen-6">
+  <div class="eyebrow">fase 5 · monte a frase</div>
+  <h2 class="display">Toque nas palavras em ordem</h2>
+  <div id="sentence-slots"></div>
+  <div id="word-bank"></div>
+  <div class="sentence-hint" id="sentence-hint">toque nas palavras abaixo, na ordem certa</div>
+  <button class="btn hidden" id="btn-after-sentence">Continuar</button>
+</section>
+
+<!-- ================= SCREEN 7 — SEGREDO / FINAL ================= -->
+<section class="screen" id="screen-7">
+  <div class="eyebrow">o segredo</div>
+  <h2 class="display" style="font-size:26px; margin-bottom:6px;">Você desbloqueou isso ♾️</h2>
+  <div class="photo-wrap" id="photo-wrap"><img src="nos.png" alt="nós"></div>
+  <div class="photo-caption">oq pode ser nossa familia um dia </div>
+  <p class="msg-line reveal" style="opacity:1; margin-top:14px;">Você chegou até aqui. Isso já diz muito sobre o quanto eu queria te ver sorrir hoje.</p>
+  <button class="btn glow" id="btn-final">Isso é pra você ❤️</button>
+</section>
+
+<!-- ================= SCREEN 8 — FINAL ================= -->
+<section class="screen" id="screen-8">
+  <svg class="infinity-mark" viewBox="0 0 100 50"><path d="M25,25 C25,10 45,10 50,25 C55,40 75,40 75,25 C75,10 55,10 50,25 C45,40 25,40 25,25 Z"/></svg>
+  <div class="final-title">Eu te amo,<br>Minha princesa.</div>
+  <p class="msg-line reveal" style="opacity:1; max-width:440px;">Para sempre. Do tamanho do infinito. Se um dia eu me casar com saiba que  vai ser o dia mais feliz da minha vida,na verdade ja e o dia mas feliz por que estou com voce.</p>
+  <p class="small-note">— Rafael</p>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ BACKGROUND PARTICLES (hearts) ============ */
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function makeParticle(){
+    return {
+      x: Math.random()*W,
+      y: H + 20 + Math.random()*100,
+      size: 8 + Math.random()*16,
+      speed: 0.3 + Math.random()*0.7,
+      drift: (Math.random()-0.5)*0.6,
+      opacity: 0.08 + Math.random()*0.22,
+      hue: Math.random() < 0.5 ? '#ff7ab8' : '#b98af0'
+    };
+  }
+  for(let i=0;i<28;i++) particles.push(Object.assign(makeParticle(), {y: Math.random()*H}));
+
+  function drawHeart(x,y,size,color,opacity){
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.translate(x,y);
+    ctx.scale(size/20, size/20);
+    ctx.beginPath();
+    ctx.moveTo(0,4);
+    ctx.bezierCurveTo(0,-2,-10,-6,-10,2);
+    ctx.bezierCurveTo(-10,10,0,14,0,20);
+    ctx.bezierCurveTo(0,14,10,10,10,2);
+    ctx.bezierCurveTo(10,-6,0,-2,0,4);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      p.y -= p.speed;
+      p.x += p.drift;
+      if(p.y < -30){ Object.assign(p, makeParticle()); }
+      drawHeart(p.x, p.y, p.size, p.hue, p.opacity);
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  /* ============ MUSIC TOGGLE ============ */
+  const music = document.getElementById('bg-music');
+  const musicBtn = document.getElementById('music-toggle');
+  let playing = false;
+  musicBtn.addEventListener('click', ()=>{
+    if(!playing){
+      music.volume = 0.35;
+      music.play().then(()=>{ playing = true; musicBtn.textContent = '🔊'; })
+        .catch(()=>{ musicBtn.textContent = '🔇'; });
+    } else {
+      music.pause(); playing = false; musicBtn.textContent = '🔇';
+    }
+  });
+
+  /* ============ SCREEN NAVIGATION ============ */
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const TOTAL_STEPS = 7; // steps 1..7 counted, screen-8 is the finale (100%)
+
+  function goTo(id){
+    screens.forEach(s=> s.classList.remove('active'));
+    const target = document.getElementById(id);
+    target.classList.add('active');
+    window.scrollTo(0,0);
+    const idx = parseInt(id.split('-')[1],10);
+    if(idx === 0){
+      progressWrap.classList.remove('show');
+    } else {
+      progressWrap.classList.add('show');
+      const pct = Math.min(100, Math.round((idx/TOTAL_STEPS)*100));
+      progressFill.style.width = pct + '%';
+      progressLabel.textContent = idx >= 8 ? 'completo ♾️' : `passo ${idx}/${TOTAL_STEPS}`;
+    }
+  }
+
+  document.getElementById('btn-start').addEventListener('click', ()=>{
+    goTo('screen-1');
+    startMessageSequence();
+  });
+
+  /* ============ SCREEN 1: mensagem inicial ============ */
+  function startMessageSequence(){
+    const lines = [
+      "Oi, princesa.",
+      "Fiz esse site inteiro só pra você — do meu jeito, com carinho.",
+      "Tem uns joguinhos rápidos pelo caminho. No final tem uma surpresa.",
+      "Vem comigo?"
+    ];
+    const container = document.getElementById('msg-lines');
+    container.innerHTML = '';
+    let delay = 300;
+    lines.forEach((line)=>{
+      const p = document.createElement('p');
+      p.className = 'msg-line';
+      p.textContent = line;
+      container.appendChild(p);
+      setTimeout(()=> p.classList.add('reveal'), delay);
+      delay += 900;
+    });
+    setTimeout(()=> document.getElementById('btn-after-msg').classList.remove('hidden'), delay + 300);
+  }
+  document.getElementById('btn-after-msg').addEventListener('click', ()=>{
+    goTo('screen-2');
+    initMemoryGame();
+  });
+
+  /* ============ SCREEN 2: jogo da memória ============ */
+  function initMemoryGame(){
+    const icons = ['💜','💖','♾️','😘','🌙','✨'];
+    let deck = [...icons, ...icons];
+    deck.sort(()=> Math.random()-0.5);
+    const grid = document.getElementById('memory-grid');
+    grid.innerHTML = '';
+    let flipped = [], matchedCount = 0, moves = 0, lock = false;
+    document.getElementById('btn-after-memory').classList.add('hidden');
+    document.getElementById('mem-status').textContent = '0 movimentos';
+
+    deck.forEach((icon)=>{
+      const card = document.createElement('div');
+      card.className = 'mem-card';
+      card.innerHTML = `<div class="mem-inner">
+          <div class="mem-face mem-front"></div>
+          <div class="mem-face mem-back">${icon}</div>
+        </div>`;
+      card.dataset.icon = icon;
+      card.addEventListener('click', ()=>{
+        if(lock || card.classList.contains('flip') || card.classList.contains('matched')) return;
+        card.classList.add('flip');
+        flipped.push(card);
+        if(flipped.length === 2){
+          moves++;
+          document.getElementById('mem-status').textContent = moves + ' movimentos';
+          lock = true;
+          const [a,b] = flipped;
+          if(a.dataset.icon === b.dataset.icon){
+            a.classList.add('matched'); b.classList.add('matched');
+            matchedCount++;
+            flipped = []; lock = false;
+            if(matchedCount === icons.length){
+              document.getElementById('mem-status').textContent = 'Todos os pares encontrados! 💞';
+              document.getElementById('btn-after-memory').classList.remove('hidden');
+            }
+          } else {
+            setTimeout(()=>{
+              a.classList.remove('flip'); b.classList.remove('flip');
+              flipped = []; lock = false;
+            }, 700);
+          }
+        }
+      });
+      grid.appendChild(card);
+    });
+  }
+  document.getElementById('btn-after-memory').addEventListener('click', ()=>{
+    goTo('screen-3');
+    initQuiz();
+  });
+
+  /* ============ SCREEN 3: quiz ============ */
+  const quizData = [
+    { q:"Quem ama mais?", options:["Eu","Voce","Empate"], reveal:"A resposta certa é: EU. Sempre vou amar mais 💜" },
+    { q:"Quem é a pessoa mais linda do mundo?", options:["vc","Eu","As duas coisas"], reveal:"A resposta certa é: VOCE. Sem dúvida nenhuma 😍" },
+    { q:"Até quando eu vou gostar de você?", options:["Um tempo","Para sempre","Depende do dia"], reveal:"A resposta certa é: PARA SEMPRE. Nem um pouquinho menos que isso." },
+    { q:"Meu amor por você é do tamanho de...", options:["Um oceano","Uma montanha","♾️ infinito"], reveal:"A resposta certa é: ♾️ INFINITO. Não cabe em número nenhum." },
+  ];
+  let quizIndex = 0;
+  function initQuiz(){
+    quizIndex = 0;
+    renderQuiz();
+  }
+  function renderQuiz(){
+    const item = quizData[quizIndex];
+    document.getElementById('quiz-counter').textContent = `pergunta ${quizIndex+1}/${quizData.length}`;
+    document.getElementById('quiz-question').textContent = item.q;
+    document.getElementById('quiz-feedback').textContent = '';
+    document.getElementById('btn-quiz-next').classList.add('hidden');
+    const optsWrap = document.getElementById('quiz-options');
+    optsWrap.innerHTML = '';
+    item.options.forEach(opt=>{
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.addEventListener('click', ()=>{
+        Array.from(optsWrap.children).forEach(c=> c.classList.remove('chosen'));
+        b.classList.add('chosen');
+        Array.from(optsWrap.children).forEach(c=> c.disabled = true);
+        document.getElementById('quiz-feedback').textContent = item.reveal;
+        document.getElementById('btn-quiz-next').classList.remove('hidden');
+      });
+      optsWrap.appendChild(b);
+    });
+  }
+  document.getElementById('btn-quiz-next').addEventListener('click', ()=>{
+    quizIndex++;
+    if(quizIndex < quizData.length){
+      renderQuiz();
+    } else {
+      goTo('screen-4');
+      resetClickGame();
+    }
+  });
+
+  /* ============ SCREEN 4: clique rápido ============ */
+  let clickTimerId, clickSpawnId, clickTime = 20, clickScore = 0;
+  function resetClickGame(){
+    clickTime = 20; clickScore = 0;
+    document.getElementById('click-timer').textContent = clickTime;
+    document.getElementById('click-score').textContent = clickScore;
+    document.getElementById('click-arena').innerHTML = '';
+    document.getElementById('btn-start-click').classList.remove('hidden');
+    document.getElementById('btn-after-click').classList.add('hidden');
+    clearInterval(clickTimerId); clearInterval(clickSpawnId);
+  }
+  document.getElementById('btn-start-click').addEventListener('click', ()=>{
+    document.getElementById('btn-start-click').classList.add('hidden');
+    const arena = document.getElementById('click-arena');
+    clickSpawnId = setInterval(()=> spawnHeart(arena), 550);
+    clickTimerId = setInterval(()=>{
+      clickTime--;
+      document.getElementById('click-timer').textContent = clickTime;
+      if(clickTime <= 0){
+        clearInterval(clickTimerId); clearInterval(clickSpawnId);
+        arena.innerHTML = '';
+        document.getElementById('btn-after-click').classList.remove('hidden');
+      }
+    }, 1000);
+  });
+  function spawnHeart(arena){
+    const h = document.createElement('div');
+    h.className = 'float-heart';
+    h.textContent = ['💗','💜','💖','💞'][Math.floor(Math.random()*4)];
+    const maxX = arena.clientWidth - 30, maxY = arena.clientHeight - 30;
+    h.style.left = Math.max(0, Math.random()*maxX) + 'px';
+    h.style.top = Math.max(0, Math.random()*maxY) + 'px';
+    h.addEventListener('click', ()=>{
+      clickScore++;
+      document.getElementById('click-score').textContent = clickScore;
+      h.remove();
+    });
+    arena.appendChild(h);
+    setTimeout(()=> h.remove(), 1400);
+  }
+  document.getElementById('btn-after-click').addEventListener('click', ()=>{
+    goTo('screen-5');
+    initStory();
+  });
+
+  /* ============ SCREEN 5: escolhas ============ */
+  const storySteps = [
+    {
+      text:"O que você quer ganhar na sua festa de 15?",
+      options:[
+        {label:"Uma aliança e buquê de lírios", next:1},
+        {label:"Uma surpresa especial", next:1}
+      ]
+    },
+    {
+      text:"Eu sempre te amei, e sim: na sua festa você vai ter uma surpresa.",
+      options:[
+        {label:"Bobinha, isso é certo", next:2},
+        {label:"Sério que é só isso? Não acredito!", next:2}
+      ]
+    },
+    {
+      text:"Sempre vai ser nós, pra sempre. Eu te amo.",
+      options:[
+        {label:"Continuar", next:-1}
+      ]
+    }
+  ];
+  function initStory(){ renderStory(0); }
+  function renderStory(i){
+    const step = storySteps[i];
+    document.getElementById('story-text').textContent = step.text;
+    const wrap = document.getElementById('story-options');
+    wrap.innerHTML = '';
+    step.options.forEach(opt=>{
+      const b = document.createElement('button');
+      b.className = 'story-btn';
+      b.textContent = opt.label;
+      b.addEventListener('click', ()=>{
+        if(opt.next === -1){
+          goTo('screen-6');
+          initSentence();
+        } else {
+          renderStory(opt.next);
+        }
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  /* ============ SCREEN 6: montar frase (toque em ordem) ============ */
+  const sentenceWords = ["Eu","te","amo","para","sempre","♾️"];
+  function initSentence(){
+    const bank = document.getElementById('word-bank');
+    const slots = document.getElementById('sentence-slots');
+    bank.innerHTML = ''; slots.innerHTML = '';
+    document.getElementById('btn-after-sentence').classList.add('hidden');
+    document.getElementById('sentence-hint').textContent = 'toque nas palavras abaixo, na ordem certa';
+
+    let placed = [];
+    const shuffled = [...sentenceWords].sort(()=> Math.random()-0.5);
+
+    shuffled.forEach((word, i)=>{
+      const tag = document.createElement('div');
+      tag.className = 'bank-tag';
+      tag.textContent = word;
+      tag.dataset.word = word;
+      tag.addEventListener('click', ()=>{
+        if(tag.classList.contains('used')) return;
+        const expected = sentenceWords[placed.length];
+        if(word === expected){
+          tag.classList.add('used');
+          const slotTag = document.createElement('div');
+          slotTag.className = 'slot-tag';
+          slotTag.textContent = word;
+          slots.appendChild(slotTag);
+          placed.push(word);
+          if(placed.length === sentenceWords.length){
+            document.getElementById('sentence-hint').textContent = 'Perfeito. Essa frase é sobre nós. ♾️';
+            document.getElementById('btn-after-sentence').classList.remove('hidden');
+          }
+        } else {
+          tag.style.transform = 'translateX(-4px)';
+          setTimeout(()=> tag.style.transform = '', 150);
+        }
+      });
+      bank.appendChild(tag);
+    });
+  }
+  document.getElementById('btn-after-sentence').addEventListener('click', ()=>{
+    goTo('screen-7');
+    revealPhoto();
+  });
+
+  /* ============ SCREEN 7: segredo ============ */
+  function revealPhoto(){
+    setTimeout(()=> document.getElementById('photo-wrap').classList.add('show'), 400);
+  }
+  document.getElementById('btn-final').addEventListener('click', ()=>{
+    goTo('screen-8');
+  });
+
+})();
+</script>
+</body>
+</html>
